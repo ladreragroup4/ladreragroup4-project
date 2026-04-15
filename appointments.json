@@ -1,0 +1,25 @@
+[
+  {
+    "appointment_id": 1,
+    "customer_name": "John Doe",
+    "service_ids": [
+      1,
+      2
+    ],
+    "date_time": "2024-12-15T10:00",
+    "special_requests": "Please arrive on time",
+    "status": "Ongoing",
+    "total_fee": 1750.0
+  },
+  {
+    "appointment_id": 2,
+    "customer_name": "james",
+    "service_ids": [
+      1
+    ],
+    "date_time": "2026-04-15T13:00",
+    "special_requests": "buzzcut",
+    "status": "Pending",
+    "total_fee": 250.0
+  }
+]

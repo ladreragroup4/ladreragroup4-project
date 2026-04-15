@@ -1,0 +1,32 @@
+[
+  {
+    "service_id": 1,
+    "name": "Haircut",
+    "fee": 250.0,
+    "description": "Basic haircut service"
+  },
+  {
+    "service_id": 2,
+    "name": "Hair Color",
+    "fee": 1500.0,
+    "description": "Full hair coloring"
+  },
+  {
+    "service_id": 3,
+    "name": "Manicure",
+    "fee": 300.0,
+    "description": "Nail cleaning and polishing"
+  },
+  {
+    "service_id": 4,
+    "name": "Pedicure",
+    "fee": 350.0,
+    "description": "Foot spa and nail care"
+  },
+  {
+    "service_id": 5,
+    "name": "Facial",
+    "fee": 800.0,
+    "description": "Deep cleansing facial"
+  }
+]
