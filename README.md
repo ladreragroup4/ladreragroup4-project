@@ -42,3 +42,5 @@ Use the following credentials to access the system:
 Modules
 
 We developed Module 1: Service Management, implementing features to add, view, update, and delete services while following system rules. This module ensures that each service has a unique ID and that service fees are valid, providing an organized and efficient way to manage service information within the system.
+
+We developed Module 2: Appointment Scheduling, implementing features to create service appointments, select services, set the date and time, and add special requests. This module ensures that each appointment includes at least one service and that the selected date and time are valid, providing a smooth and organized scheduling process for users.
