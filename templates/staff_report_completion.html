@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Appointment Completion Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
+        h2 { color: #2c3e50; }
+        .report-detail { background: #ecf0f1; padding: 15px; border-radius: 8px; margin: 20px 0; }
+        .btn { display: inline-block; background: #3498db; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; margin-right: 10px; }
+        .btn:hover { background: #2980b9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>✅ Service Completion Report</h2>
+        <p>The following appointment has been marked as <strong>Completed</strong>.</p>
+        <div class="report-detail">
+            <p><strong>Appointment ID:</strong> {{ report.appointment_id }}</p>
+            <p><strong>Customer:</strong> {{ report.customer }}</p>
+            <p><strong>Services:</strong> {{ report.services|join(', ') }}</p>
+            <p><strong>Total Fee:</strong> ₱{{ "%.2f"|format(report.total_fee) }}</p>
+            <p><strong>Date & Time:</strong> {{ report.date_time }}</p>
+            <p><strong>Status:</strong> {{ report.status }}</p>
+        </div>
+        <p>This report has been recorded in the system.</p>
+        <a href="/staff/appointments" class="btn">Back to Appointments</a>
+        <a href="/staff/service_history" class="btn">View Service History</a>
+    </div>
+</body>
+</html>
