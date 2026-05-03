@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Staff - Appointments</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f4f4; }
+        .navbar {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .nav-links a { color: white; text-decoration: none; margin-left: 15px; }
+        .container { padding: 30px; max-width: 1200px; margin: 0 auto; }
+        .card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background: #2c3e50; color: white; }
+        .status-pending { background: #ffeaa7; color: #d63031; font-weight: bold; }
+        .status-ongoing { background: #74b9ff; color: #2d3436; font-weight: bold; }
+        .status-completed { background: #55efc4; color: #006266; font-weight: bold; }
+        select, button { padding: 6px 12px; border-radius: 4px; border: 1px solid #ccc; }
+        button { background: #2c3e50; color: white; cursor: pointer; }
+        button:hover { background: #3498db; }
+        .flash { background: #f8d7da; color: #721c24; padding: 10px; margin-bottom: 20px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h2>Staff - Appointment Management</h2>
+        <div class="nav-links">
+            <a href="/staff/dashboard">Dashboard</a>
+            <a href="/staff/appointments">Appointments</a>
+            <a href="/staff/service_history">History</a>
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="flash">
+                    {% for message in messages %}
+                        {{ message }}<br>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <div class="card">
+            <h2>All Appointments</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th><th>Customer</th><th>Services</th><th>Date & Time</th><th>Status</th><th>Update Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for apt in appointments %}
+                    <tr>
+                        <td>{{ apt.get_appointment_id() }}</td>
+                        <td>{{ apt.get_customer_name() }}</td>
+                        <td>{{ apt.get_service_list()|map(attribute='get_name')|join(', ') }}</td>
+                        <td>{{ apt.get_date_time() }}</td>
+                        <td class="status-{{ apt.get_status().lower() }}">{{ apt.get_status() }}</td>
+                        <td>
+                            <form method="POST" action="/staff/update_status/{{ apt.get_appointment_id() }}">
+                                <select name="status">
+                                    <option value="Pending" {% if apt.get_status() == 'Pending' %}selected{% endif %}>Pending</option>
+                                    <option value="Ongoing" {% if apt.get_status() == 'Ongoing' %}selected{% endif %}>Ongoing</option>
+                                    <option value="Completed" {% if apt.get_status() == 'Completed' %}selected{% endif %}>Completed</option>
+                                </select>
+                                <button type="submit">Update</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
