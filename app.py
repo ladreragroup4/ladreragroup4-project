@@ -7,9 +7,9 @@ from io import StringIO
 from functools import wraps
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key_here'  # In production, use environment variable
+app.secret_key = 'your_secret_key_here'
 
-# ============ OOP CLASSES ============
+# ============ OOP CLASSES (unchanged) ============
 
 class Service:
     def __init__(self, service_id, name, fee, description=""):
@@ -18,30 +18,21 @@ class Service:
         self.__fee = fee
         self.__description = description
     
-    # Getters
     def get_service_id(self):
         return self.__service_id
-    
     def get_name(self):
         return self.__name
-    
     def get_fee(self):
         return self.__fee
-    
     def get_description(self):
         return self.__description
-    
-    # Setters
     def set_name(self, name):
         self.__name = name
-    
     def set_fee(self, fee):
         if fee > 0:
             self.__fee = fee
-    
     def set_description(self, description):
         self.__description = description
-    
     def to_dict(self):
         return {
             'service_id': self.__service_id,
@@ -49,7 +40,6 @@ class Service:
             'fee': self.__fee,
             'description': self.__description
         }
-    
     def display(self):
         return f"ID: {self.__service_id} | Name: {self.__name} | Fee: ₱{self.__fee}"
 
@@ -57,46 +47,33 @@ class Appointment:
     def __init__(self, appointment_id, customer_name, service_list, date_time, special_requests=""):
         self.__appointment_id = appointment_id
         self.__customer_name = customer_name
-        self.__service_list = service_list  # List of Service objects
+        self.__service_list = service_list
         self.__date_time = date_time
         self.__special_requests = special_requests
-        self.__status = "Pending"  # Pending, Ongoing, Completed
+        self.__status = "Pending"
     
-    # Getters
     def get_appointment_id(self):
         return self.__appointment_id
-    
     def get_customer_name(self):
         return self.__customer_name
-    
     def get_service_list(self):
         return self.__service_list
-    
     def get_date_time(self):
         return self.__date_time
-    
     def get_special_requests(self):
         return self.__special_requests
-    
     def get_status(self):
         return self.__status
-    
-    # Setters
     def set_status(self, status):
         valid_statuses = ["Pending", "Ongoing", "Completed"]
         if status in valid_statuses:
             self.__status = status
-    
     def set_date_time(self, date_time):
         self.__date_time = date_time
-    
     def add_service(self, service):
         self.__service_list.append(service)
-    
     def get_total_fee(self):
-        total = sum(service.get_fee() for service in self.__service_list)
-        return total
-    
+        return sum(service.get_fee() for service in self.__service_list)
     def to_dict(self):
         return {
             'appointment_id': self.__appointment_id,
@@ -107,12 +84,11 @@ class Appointment:
             'status': self.__status,
             'total_fee': self.get_total_fee()
         }
-    
     def display(self):
         services_str = ", ".join([s.get_name() for s in self.__service_list])
         return f"ID: {self.__appointment_id} | Customer: {self.__customer_name} | Services: {services_str} | Date: {self.__date_time} | Status: {self.__status}"
 
-# ============ DATA STORAGE ============
+# ============ DATA STORAGE (unchanged except bug fix) ============
 
 class DataManager:
     def __init__(self):
@@ -123,7 +99,6 @@ class DataManager:
         self.load_data()
     
     def load_data(self):
-        # Load services
         if os.path.exists('services.json'):
             try:
                 with open('services.json', 'r') as f:
@@ -135,7 +110,6 @@ class DataManager:
             except:
                 pass
         
-        # Load appointments
         if os.path.exists('appointments.json'):
             try:
                 with open('appointments.json', 'r') as f:
@@ -150,36 +124,30 @@ class DataManager:
             except:
                 pass
         
-        # Add sample data if no data exists
         if len(self.services) == 0:
             self.add_sample_data()
     
     def add_sample_data(self):
-        # Add sample services
         self.add_service("Haircut", 250.00, "Basic haircut service")
         self.add_service("Hair Color", 1500.00, "Full hair coloring")
         self.add_service("Manicure", 300.00, "Nail cleaning and polishing")
         self.add_service("Pedicure", 350.00, "Foot spa and nail care")
         self.add_service("Facial", 800.00, "Deep cleansing facial")
         
-        # Add sample appointments
         service1 = self.find_service_by_id(1)
         service2 = self.find_service_by_id(2)
         if service1 and service2:
             self.create_appointment("John Doe", [1, 2], "2024-12-15T10:00", "Please arrive on time")
         
-        # FIX: service3 was undefined - now properly fetched
+        # Fixed bug: service3 was undefined
         service3 = self.find_service_by_id(3)
         if service3:
             self.create_appointment("Jane Smith", [3], "2024-12-16T14:30", "")
     
     def save_data(self):
-        # Save services
         services_data = [s.to_dict() for s in self.services]
         with open('services.json', 'w') as f:
             json.dump(services_data, f, indent=2)
-        
-        # Save appointments
         appointments_data = [a.to_dict() for a in self.appointments]
         with open('appointments.json', 'w') as f:
             json.dump(appointments_data, f, indent=2)
@@ -187,7 +155,6 @@ class DataManager:
     def add_service(self, name, fee, description=""):
         if fee <= 0:
             return False, "Service fee must be greater than zero"
-        
         service = Service(self.next_service_id, name, fee, description)
         self.services.append(service)
         self.next_service_id += 1
@@ -226,16 +193,13 @@ class DataManager:
     def create_appointment(self, customer_name, service_ids, date_time, special_requests=""):
         if not service_ids:
             return False, "Appointment must include at least one service"
-        
         service_list = []
         for sid in service_ids:
             service = self.find_service_by_id(sid)
             if service:
                 service_list.append(service)
-        
         if not service_list:
             return False, "No valid services selected"
-        
         appointment = Appointment(self.next_appointment_id, customer_name, 
                                 service_list, date_time, special_requests)
         self.appointments.append(appointment)
@@ -264,16 +228,12 @@ class DataManager:
         daily_appointments = [a for a in self.appointments if a.get_date_time().startswith(date)]
         total_appointments = len(daily_appointments)
         total_fees = sum(a.get_total_fee() for a in daily_appointments)
-        
-        # Get most requested service
         service_count = {}
         for appointment in daily_appointments:
             for service in appointment.get_service_list():
                 service_name = service.get_name()
                 service_count[service_name] = service_count.get(service_name, 0) + 1
-        
         most_requested = max(service_count.items(), key=lambda x: x[1])[0] if service_count else "None"
-        
         return {
             'date': date,
             'total_appointments': total_appointments,
@@ -285,17 +245,13 @@ class DataManager:
     def get_monthly_report(self, year, month):
         monthly_appointments = [a for a in self.appointments 
                                if a.get_date_time().startswith(f"{year}-{month:02d}")]
-        
         total_appointments = len(monthly_appointments)
         total_fees = sum(a.get_total_fee() for a in monthly_appointments)
-        
-        # Service summary
         service_summary = {}
         for appointment in monthly_appointments:
             for service in appointment.get_service_list():
                 service_name = service.get_name()
                 service_summary[service_name] = service_summary.get(service_name, 0) + 1
-        
         return {
             'year': year,
             'month': month,
@@ -304,10 +260,9 @@ class DataManager:
             'service_summary': service_summary
         }
 
-# ============ HELPER DECORATOR (avoids repeating role checks) ============
+# ============ HELPER DECORATORS ============
 
 def admin_required(f):
-    """Decorator to ensure user is logged in as admin."""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'username' not in session or session.get('role') != 'admin':
@@ -317,7 +272,6 @@ def admin_required(f):
     return decorated_function
 
 def user_required(f):
-    """Decorator to ensure user is logged in as regular user."""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'username' not in session or session.get('role') != 'user':
@@ -326,16 +280,26 @@ def user_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def staff_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'username' not in session or session.get('role') != 'staff':
+            flash('Please login as staff first')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 # ============ FLASK ROUTES ============
 
 data_manager = DataManager()
 
-# Users database (in production, hash passwords!)
+# Users database (added staff user)
 users = {
     'admin': ['admin123', 'admin'],
     'user1': ['user123', 'user'],
     'gwapo': ['admin123', 'admin'],
-    'pangit': ['user123', 'user']
+    'pangit': ['user123', 'user'],
+    'staff1': ['staff123', 'staff']   # new staff account
 }
 
 @app.route('/')
@@ -353,8 +317,11 @@ def login():
                 session['username'] = username
                 session['role'] = users[username][1]
                 
-                if users[username][1] == 'admin':
+                role = users[username][1]
+                if role == 'admin':
                     return redirect(url_for('admin_dashboard'))
+                elif role == 'staff':
+                    return redirect(url_for('staff_dashboard'))
                 else:
                     return redirect(url_for('user_dashboard'))
             else:
@@ -370,14 +337,13 @@ def logout():
     flash('You have been logged out')
     return redirect(url_for('login'))
 
-# ============ ADMIN ROUTES ============
+# ============ ADMIN ROUTES (unchanged) ============
 
 @app.route('/admin/dashboard')
 @admin_required
 def admin_dashboard():
     return render_template('admin_dashboard.html', username=session['username'])
 
-# Service Management
 @app.route('/admin/services')
 @admin_required
 def admin_services():
@@ -390,7 +356,6 @@ def add_service():
     name = request.form.get('name', '')
     fee = float(request.form.get('fee', 0))
     description = request.form.get('description', '')
-    
     success, message = data_manager.add_service(name, fee, description)
     flash(message)
     return redirect(url_for('admin_services'))
@@ -401,7 +366,6 @@ def update_service(service_id):
     name = request.form.get('name', '')
     fee = float(request.form.get('fee', 0))
     description = request.form.get('description', '')
-    
     success, message = data_manager.update_service(service_id, name, fee, description)
     flash(message)
     return redirect(url_for('admin_services'))
@@ -413,7 +377,6 @@ def delete_service(service_id):
     flash(message)
     return redirect(url_for('admin_services'))
 
-# Appointment Management for Admin
 @app.route('/admin/appointments')
 @admin_required
 def admin_appointments():
@@ -428,7 +391,6 @@ def update_appointment_status(appointment_id):
     flash(message)
     return redirect(url_for('admin_appointments'))
 
-# Reports for Admin (original)
 @app.route('/admin/reports')
 @admin_required
 def admin_reports():
@@ -449,8 +411,7 @@ def monthly_report():
     report = data_manager.get_monthly_report(year, month)
     return render_template('admin_reports.html', monthly_report=report)
 
-# ============ NEW IMPROVED REPORT ROUTES (with export and service history) ============
-
+# Admin new report routes (export, service history)
 @app.route('/admin/daily_report', methods=['GET', 'POST'])
 @admin_required
 def daily_report_view():
@@ -478,13 +439,10 @@ def export_daily_report():
     if not date:
         flash('No date provided')
         return redirect(url_for('daily_report_view'))
-    
     report = data_manager.get_daily_report(date)
     if report['total_appointments'] == 0:
         flash('No appointments for this date')
         return redirect(url_for('daily_report_view'))
-    
-    # Create CSV
     si = StringIO()
     cw = csv.writer(si)
     cw.writerow(['Appointment ID', 'Customer Name', 'Services', 'Date/Time', 'Status', 'Total Fee'])
@@ -497,13 +455,8 @@ def export_daily_report():
             apt.get_status(),
             f"₱{apt.get_total_fee():.2f}"
         ])
-    
     output = si.getvalue()
-    return Response(
-        output,
-        mimetype='text/csv',
-        headers={'Content-Disposition': f'attachment; filename=daily_report_{date}.csv'}
-    )
+    return Response(output, mimetype='text/csv', headers={'Content-Disposition': f'attachment; filename=daily_report_{date}.csv'})
 
 @app.route('/admin/export_monthly_report')
 @admin_required
@@ -513,12 +466,10 @@ def export_monthly_report():
     if not year or not month:
         flash('Missing year/month')
         return redirect(url_for('monthly_report_view'))
-    
     report = data_manager.get_monthly_report(year, month)
     if report['total_appointments'] == 0:
         flash('No appointments for this month')
         return redirect(url_for('monthly_report_view'))
-    
     si = StringIO()
     cw = csv.writer(si)
     cw.writerow(['Service', 'Times Requested'])
@@ -527,23 +478,74 @@ def export_monthly_report():
     cw.writerow([])
     cw.writerow(['Total Appointments', report['total_appointments']])
     cw.writerow(['Total Fees', f"₱{report['total_fees']:.2f}"])
-    
     output = si.getvalue()
-    return Response(
-        output,
-        mimetype='text/csv',
-        headers={'Content-Disposition': f'attachment; filename=monthly_report_{year}_{month:02d}.csv'}
-    )
+    return Response(output, mimetype='text/csv', headers={'Content-Disposition': f'attachment; filename=monthly_report_{year}_{month:02d}.csv'})
 
 @app.route('/admin/service_history')
 @admin_required
 def admin_service_history():
-    # Reuse the same logic as user service history but for admin
     all_appointments = data_manager.get_all_appointments()
     completed_appointments = [a for a in all_appointments if a.get_status() == 'Completed']
     return render_template('service_history.html', appointments=completed_appointments)
 
-# ============ USER ROUTES ============
+# ============ STAFF ROUTES (new) ============
+
+@app.route('/staff/dashboard')
+@staff_required
+def staff_dashboard():
+    return render_template('staff_admindashboard.html', username=session['username'])
+
+@app.route('/staff/appointments')
+@staff_required
+def staff_appointments():
+    appointments = data_manager.get_all_appointments()
+    return render_template('staff_appointments.html', appointments=appointments)
+
+@app.route('/staff/update_status/<int:appointment_id>', methods=['POST'])
+@staff_required
+def staff_update_status(appointment_id):
+    status = request.form.get('status')
+    if status not in ['Pending', 'Ongoing', 'Completed']:
+        flash('Invalid status')
+        return redirect(url_for('staff_appointments'))
+    
+    success, message = data_manager.update_appointment_status(appointment_id, status)
+    flash(message)
+    
+    # If status is Completed, redirect to report completion view
+    if status == 'Completed' and success:
+        flash('Appointment completed. Report has been recorded.')
+        return redirect(url_for('staff_report_completion', appointment_id=appointment_id))
+    
+    return redirect(url_for('staff_appointments'))
+
+@app.route('/staff/report_completion/<int:appointment_id>')
+@staff_required
+def staff_report_completion(appointment_id):
+    appointment = data_manager.find_appointment_by_id(appointment_id)
+    if not appointment:
+        flash('Appointment not found')
+        return redirect(url_for('staff_appointments'))
+    
+    # Generate a simple report for this completed appointment
+    report = {
+        'appointment_id': appointment.get_appointment_id(),
+        'customer': appointment.get_customer_name(),
+        'services': [s.get_name() for s in appointment.get_service_list()],
+        'total_fee': appointment.get_total_fee(),
+        'date_time': appointment.get_date_time(),
+        'status': appointment.get_status()
+    }
+    return render_template('staff_report_completion.html', report=report, appointment=appointment)
+
+@app.route('/staff/service_history')
+@staff_required
+def staff_service_history():
+    all_appointments = data_manager.get_all_appointments()
+    completed_appointments = [a for a in all_appointments if a.get_status() == 'Completed']
+    return render_template('service_history.html', appointments=completed_appointments)
+
+# ============ USER ROUTES (unchanged) ============
 
 @app.route('/user/dashboard')
 @user_required
@@ -564,12 +566,10 @@ def book_appointment():
         service_ids = [int(sid) for sid in request.form.getlist('service_ids')]
         date_time = request.form.get('date_time', '')
         special_requests = request.form.get('special_requests', '')
-        
         success, message = data_manager.create_appointment(customer_name, service_ids, date_time, special_requests)
         flash(message)
         if success:
             return redirect(url_for('user_appointments'))
-    
     services = data_manager.get_all_services()
     return render_template('book_appointment.html', services=services)
 
@@ -587,7 +587,6 @@ def track_appointment():
         appointment_id = request.args.get('appointment_id')
         if appointment_id:
             appointment = data_manager.find_appointment_by_id(int(appointment_id))
-    
     return render_template('track_appointment.html', appointment=appointment)
 
 @app.route('/user/service_history')
