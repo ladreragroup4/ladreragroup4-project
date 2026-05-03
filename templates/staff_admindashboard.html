@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f4f4; }
+        .navbar {
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar h2 { font-size: 20px; }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-left: 10px;
+        }
+        .nav-links a:hover { background: rgba(255,255,255,0.2); }
+        .container { padding: 30px; max-width: 1200px; margin: 0 auto; }
+        .welcome-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .dashboard-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+            text-decoration: none;
+            color: #333;
+            display: block;
+        }
+        .dashboard-card:hover { transform: translateY(-5px); background: #f9f9f9; }
+        .dashboard-card h3 { color: #2c3e50; margin-bottom: 15px; font-size: 24px; }
+        .dashboard-card p { color: #666; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h2>Service Appointment System - Staff Panel</h2>
+        <div class="nav-links">
+            <a href="/staff/dashboard">Dashboard</a>
+            <a href="/staff/appointments">View Appointments</a>
+            <a href="/staff/service_history">History</a>
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+    <div class="container">
+        <div class="welcome-card">
+            <h1>Welcome, {{ username }} (Staff)</h1>
+            <p>Manage appointments, update service status, and view completion reports.</p>
+        </div>
+        <div class="dashboard-grid">
+            <a href="/staff/appointments" class="dashboard-card">
+                <h3>📋 View Assigned Appointments</h3>
+                <p>See all appointments and update their status (Pending → Ongoing → Completed).</p>
+            </a>
+            <a href="/staff/appointments" class="dashboard-card">
+                <h3>🔄 Update Service Status</h3>
+                <p>Mark appointments as Ongoing or Completed. Completed appointments generate a report.</p>
+            </a>
+            <a href="/staff/service_history" class="dashboard-card">
+                <h3>📜 View Service History</h3>
+                <p>See all completed appointments.</p>
+            </a>
+        </div>
+    </div>
+</body>
+</html>
