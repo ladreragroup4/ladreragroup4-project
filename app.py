@@ -5,11 +5,21 @@ import os
 import csv
 from io import StringIO
 from functools import wraps
+import tempfile
 
+# ------------------------------
+# Vercel: Use environment variable for secret key
+# ------------------------------
 app = Flask(__name__)
-app.secret_key = 'your_secret_key_here'
+app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 
-# ============ OOP CLASSES (unchanged) ============
+# ------------------------------
+# Vercel: JSON files go to /tmp (writable directory)
+# ------------------------------
+SERVICES_FILE = os.environ.get('SERVICES_FILE', os.path.join(tempfile.gettempdir(), 'services.json'))
+APPOINTMENTS_FILE = os.environ.get('APPOINTMENTS_FILE', os.path.join(tempfile.gettempdir(), 'appointments.json'))
+
+# ============ OOP CLASSES ============
 
 class Service:
     def __init__(self, service_id, name, fee, description=""):
@@ -88,7 +98,7 @@ class Appointment:
         services_str = ", ".join([s.get_name() for s in self.__service_list])
         return f"ID: {self.__appointment_id} | Customer: {self.__customer_name} | Services: {services_str} | Date: {self.__date_time} | Status: {self.__status}"
 
-# ============ DATA STORAGE (unchanged except bug fix) ============
+# ============ DATA STORAGE (using /tmp on Vercel) ============
 
 class DataManager:
     def __init__(self):
@@ -99,9 +109,10 @@ class DataManager:
         self.load_data()
     
     def load_data(self):
-        if os.path.exists('services.json'):
+        # Load services from SERVICES_FILE
+        if os.path.exists(SERVICES_FILE):
             try:
-                with open('services.json', 'r') as f:
+                with open(SERVICES_FILE, 'r') as f:
                     services_data = json.load(f)
                     for s in services_data:
                         service = Service(s['service_id'], s['name'], s['fee'], s.get('description', ''))
@@ -110,9 +121,10 @@ class DataManager:
             except:
                 pass
         
-        if os.path.exists('appointments.json'):
+        # Load appointments from APPOINTMENTS_FILE
+        if os.path.exists(APPOINTMENTS_FILE):
             try:
-                with open('appointments.json', 'r') as f:
+                with open(APPOINTMENTS_FILE, 'r') as f:
                     appointments_data = json.load(f)
                     for a in appointments_data:
                         service_list = [self.find_service_by_id(sid) for sid in a['service_ids'] if self.find_service_by_id(sid)]
@@ -139,17 +151,16 @@ class DataManager:
         if service1 and service2:
             self.create_appointment("John Doe", [1, 2], "2024-12-15T10:00", "Please arrive on time")
         
-        # Fixed bug: service3 was undefined
         service3 = self.find_service_by_id(3)
         if service3:
             self.create_appointment("Jane Smith", [3], "2024-12-16T14:30", "")
     
     def save_data(self):
         services_data = [s.to_dict() for s in self.services]
-        with open('services.json', 'w') as f:
+        with open(SERVICES_FILE, 'w') as f:
             json.dump(services_data, f, indent=2)
         appointments_data = [a.to_dict() for a in self.appointments]
-        with open('appointments.json', 'w') as f:
+        with open(APPOINTMENTS_FILE, 'w') as f:
             json.dump(appointments_data, f, indent=2)
     
     def add_service(self, name, fee, description=""):
@@ -299,7 +310,7 @@ users = {
     'user1': ['user123', 'user'],
     'gwapo': ['admin123', 'admin'],
     'pangit': ['user123', 'user'],
-    'staff1': ['staff123', 'staff']   # new staff account
+    'staff1': ['staff123', 'staff']
 }
 
 @app.route('/')
@@ -337,7 +348,7 @@ def logout():
     flash('You have been logged out')
     return redirect(url_for('login'))
 
-# ============ ADMIN ROUTES (unchanged) ============
+# ============ ADMIN ROUTES ============
 
 @app.route('/admin/dashboard')
 @admin_required
@@ -411,7 +422,6 @@ def monthly_report():
     report = data_manager.get_monthly_report(year, month)
     return render_template('admin_reports.html', monthly_report=report)
 
-# Admin new report routes (export, service history)
 @app.route('/admin/daily_report', methods=['GET', 'POST'])
 @admin_required
 def daily_report_view():
@@ -488,12 +498,12 @@ def admin_service_history():
     completed_appointments = [a for a in all_appointments if a.get_status() == 'Completed']
     return render_template('service_history.html', appointments=completed_appointments)
 
-# ============ STAFF ROUTES (new) ============
+# ============ STAFF ROUTES ============
 
 @app.route('/staff/dashboard')
 @staff_required
 def staff_dashboard():
-    return render_template('staff_admindashboard.html', username=session['username'])
+    return render_template('staff_dashboard.html', username=session['username'])
 
 @app.route('/staff/appointments')
 @staff_required
@@ -512,7 +522,6 @@ def staff_update_status(appointment_id):
     success, message = data_manager.update_appointment_status(appointment_id, status)
     flash(message)
     
-    # If status is Completed, redirect to report completion view
     if status == 'Completed' and success:
         flash('Appointment completed. Report has been recorded.')
         return redirect(url_for('staff_report_completion', appointment_id=appointment_id))
@@ -527,7 +536,6 @@ def staff_report_completion(appointment_id):
         flash('Appointment not found')
         return redirect(url_for('staff_appointments'))
     
-    # Generate a simple report for this completed appointment
     report = {
         'appointment_id': appointment.get_appointment_id(),
         'customer': appointment.get_customer_name(),
@@ -545,7 +553,7 @@ def staff_service_history():
     completed_appointments = [a for a in all_appointments if a.get_status() == 'Completed']
     return render_template('service_history.html', appointments=completed_appointments)
 
-# ============ USER ROUTES (unchanged) ============
+# ============ USER ROUTES ============
 
 @app.route('/user/dashboard')
 @user_required
