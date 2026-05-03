@@ -1,10 +1,13 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, Response
 from datetime import datetime
 import json
 import os
+import csv
+from io import StringIO
+from functools import wraps
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key_here'
+app.secret_key = 'your_secret_key_here'  # In production, use environment variable
 
 # ============ OOP CLASSES ============
 
@@ -164,6 +167,9 @@ class DataManager:
         service2 = self.find_service_by_id(2)
         if service1 and service2:
             self.create_appointment("John Doe", [1, 2], "2024-12-15T10:00", "Please arrive on time")
+        
+        # FIX: service3 was undefined - now properly fetched
+        service3 = self.find_service_by_id(3)
         if service3:
             self.create_appointment("Jane Smith", [3], "2024-12-16T14:30", "")
     
@@ -298,11 +304,33 @@ class DataManager:
             'service_summary': service_summary
         }
 
+# ============ HELPER DECORATOR (avoids repeating role checks) ============
+
+def admin_required(f):
+    """Decorator to ensure user is logged in as admin."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'username' not in session or session.get('role') != 'admin':
+            flash('Please login as admin first')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def user_required(f):
+    """Decorator to ensure user is logged in as regular user."""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'username' not in session or session.get('role') != 'user':
+            flash('Please login as user first')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 # ============ FLASK ROUTES ============
 
 data_manager = DataManager()
 
-# Users database
+# Users database (in production, hash passwords!)
 users = {
     'admin': ['admin123', 'admin'],
     'user1': ['user123', 'user'],
@@ -345,26 +373,20 @@ def logout():
 # ============ ADMIN ROUTES ============
 
 @app.route('/admin/dashboard')
+@admin_required
 def admin_dashboard():
-    if 'username' not in session or session.get('role') != 'admin':
-        flash('Please login as admin first')
-        return redirect(url_for('login'))
     return render_template('admin_dashboard.html', username=session['username'])
 
 # Service Management
 @app.route('/admin/services')
+@admin_required
 def admin_services():
-    if 'username' not in session or session.get('role') != 'admin':
-        flash('Please login as admin first')
-        return redirect(url_for('login'))
     services = data_manager.get_all_services()
     return render_template('admin_services.html', services=services)
 
 @app.route('/admin/service/add', methods=['POST'])
+@admin_required
 def add_service():
-    if 'username' not in session or session.get('role') != 'admin':
-        return redirect(url_for('login'))
-    
     name = request.form.get('name', '')
     fee = float(request.form.get('fee', 0))
     description = request.form.get('description', '')
@@ -374,10 +396,8 @@ def add_service():
     return redirect(url_for('admin_services'))
 
 @app.route('/admin/service/update/<int:service_id>', methods=['POST'])
+@admin_required
 def update_service(service_id):
-    if 'username' not in session or session.get('role') != 'admin':
-        return redirect(url_for('login'))
-    
     name = request.form.get('name', '')
     fee = float(request.form.get('fee', 0))
     description = request.form.get('description', '')
@@ -387,79 +407,158 @@ def update_service(service_id):
     return redirect(url_for('admin_services'))
 
 @app.route('/admin/service/delete/<int:service_id>')
+@admin_required
 def delete_service(service_id):
-    if 'username' not in session or session.get('role') != 'admin':
-        return redirect(url_for('login'))
-    
     success, message = data_manager.delete_service(service_id)
     flash(message)
     return redirect(url_for('admin_services'))
 
 # Appointment Management for Admin
 @app.route('/admin/appointments')
+@admin_required
 def admin_appointments():
-    if 'username' not in session or session.get('role') != 'admin':
-        return redirect(url_for('login'))
     appointments = data_manager.get_all_appointments()
     return render_template('admin_appointments.html', appointments=appointments)
 
 @app.route('/admin/appointment/update_status/<int:appointment_id>', methods=['POST'])
+@admin_required
 def update_appointment_status(appointment_id):
-    if 'username' not in session or session.get('role') != 'admin':
-        return redirect(url_for('login'))
-    
     status = request.form.get('status', 'Pending')
     success, message = data_manager.update_appointment_status(appointment_id, status)
     flash(message)
     return redirect(url_for('admin_appointments'))
 
-# Reports for Admin
+# Reports for Admin (original)
 @app.route('/admin/reports')
+@admin_required
 def admin_reports():
-    if 'username' not in session or session.get('role') != 'admin':
-        return redirect(url_for('login'))
     return render_template('admin_reports.html')
 
 @app.route('/admin/report/daily', methods=['POST'])
+@admin_required
 def daily_report():
-    if 'username' not in session or session.get('role') != 'admin':
-        return redirect(url_for('login'))
-    
     date = request.form.get('date', '')
     report = data_manager.get_daily_report(date)
     return render_template('admin_reports.html', daily_report=report)
 
 @app.route('/admin/report/monthly', methods=['POST'])
+@admin_required
 def monthly_report():
-    if 'username' not in session or session.get('role') != 'admin':
-        return redirect(url_for('login'))
-    
     year = int(request.form.get('year', 2024))
     month = int(request.form.get('month', 1))
     report = data_manager.get_monthly_report(year, month)
     return render_template('admin_reports.html', monthly_report=report)
 
+# ============ NEW IMPROVED REPORT ROUTES (with export and service history) ============
+
+@app.route('/admin/daily_report', methods=['GET', 'POST'])
+@admin_required
+def daily_report_view():
+    report = None
+    if request.method == 'POST':
+        date = request.form.get('date', '')
+        if date:
+            report = data_manager.get_daily_report(date)
+    return render_template('daily_report_view.html', report=report)
+
+@app.route('/admin/monthly_report', methods=['GET', 'POST'])
+@admin_required
+def monthly_report_view():
+    report = None
+    if request.method == 'POST':
+        year = int(request.form.get('year', 2024))
+        month = int(request.form.get('month', 1))
+        report = data_manager.get_monthly_report(year, month)
+    return render_template('monthly_report_view.html', report=report)
+
+@app.route('/admin/export_daily_report')
+@admin_required
+def export_daily_report():
+    date = request.args.get('date', '')
+    if not date:
+        flash('No date provided')
+        return redirect(url_for('daily_report_view'))
+    
+    report = data_manager.get_daily_report(date)
+    if report['total_appointments'] == 0:
+        flash('No appointments for this date')
+        return redirect(url_for('daily_report_view'))
+    
+    # Create CSV
+    si = StringIO()
+    cw = csv.writer(si)
+    cw.writerow(['Appointment ID', 'Customer Name', 'Services', 'Date/Time', 'Status', 'Total Fee'])
+    for apt in report['appointments']:
+        cw.writerow([
+            apt.get_appointment_id(),
+            apt.get_customer_name(),
+            ', '.join(s.get_name() for s in apt.get_service_list()),
+            apt.get_date_time(),
+            apt.get_status(),
+            f"₱{apt.get_total_fee():.2f}"
+        ])
+    
+    output = si.getvalue()
+    return Response(
+        output,
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment; filename=daily_report_{date}.csv'}
+    )
+
+@app.route('/admin/export_monthly_report')
+@admin_required
+def export_monthly_report():
+    year = request.args.get('year', type=int)
+    month = request.args.get('month', type=int)
+    if not year or not month:
+        flash('Missing year/month')
+        return redirect(url_for('monthly_report_view'))
+    
+    report = data_manager.get_monthly_report(year, month)
+    if report['total_appointments'] == 0:
+        flash('No appointments for this month')
+        return redirect(url_for('monthly_report_view'))
+    
+    si = StringIO()
+    cw = csv.writer(si)
+    cw.writerow(['Service', 'Times Requested'])
+    for service, count in report['service_summary'].items():
+        cw.writerow([service, count])
+    cw.writerow([])
+    cw.writerow(['Total Appointments', report['total_appointments']])
+    cw.writerow(['Total Fees', f"₱{report['total_fees']:.2f}"])
+    
+    output = si.getvalue()
+    return Response(
+        output,
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment; filename=monthly_report_{year}_{month:02d}.csv'}
+    )
+
+@app.route('/admin/service_history')
+@admin_required
+def admin_service_history():
+    # Reuse the same logic as user service history but for admin
+    all_appointments = data_manager.get_all_appointments()
+    completed_appointments = [a for a in all_appointments if a.get_status() == 'Completed']
+    return render_template('service_history.html', appointments=completed_appointments)
+
 # ============ USER ROUTES ============
 
 @app.route('/user/dashboard')
+@user_required
 def user_dashboard():
-    if 'username' not in session or session.get('role') != 'user':
-        flash('Please login as user first')
-        return redirect(url_for('login'))
     return render_template('user_dashboard.html', username=session['username'])
 
 @app.route('/user/appointments')
+@user_required
 def user_appointments():
-    if 'username' not in session or session.get('role') != 'user':
-        return redirect(url_for('login'))
     appointments = data_manager.get_all_appointments()
     return render_template('user_appointments.html', appointments=appointments)
 
 @app.route('/user/book_appointment', methods=['GET', 'POST'])
+@user_required
 def book_appointment():
-    if 'username' not in session or session.get('role') != 'user':
-        return redirect(url_for('login'))
-    
     if request.method == 'POST':
         customer_name = request.form.get('customer_name', '')
         service_ids = [int(sid) for sid in request.form.getlist('service_ids')]
@@ -475,10 +574,8 @@ def book_appointment():
     return render_template('book_appointment.html', services=services)
 
 @app.route('/user/track_appointment', methods=['GET', 'POST'])
+@user_required
 def track_appointment():
-    if 'username' not in session or session.get('role') != 'user':
-        return redirect(url_for('login'))
-    
     appointment = None
     if request.method == 'POST':
         appointment_id = request.form.get('appointment_id')
@@ -494,10 +591,8 @@ def track_appointment():
     return render_template('track_appointment.html', appointment=appointment)
 
 @app.route('/user/service_history')
+@user_required
 def service_history():
-    if 'username' not in session or session.get('role') != 'user':
-        return redirect(url_for('login'))
-    
     appointments = data_manager.get_all_appointments()
     completed_appointments = [a for a in appointments if a.get_status() == 'Completed']
     return render_template('service_history.html', appointments=completed_appointments)
