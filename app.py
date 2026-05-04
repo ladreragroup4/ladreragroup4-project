@@ -164,11 +164,26 @@ class DataManager:
             json.dump(appointments_data, f, indent=2)
     
     def add_service(self, name, fee, description=""):
+        """Admin: auto-increment ID."""
         if fee <= 0:
             return False, "Service fee must be greater than zero"
         service = Service(self.next_service_id, name, fee, description)
         self.services.append(service)
         self.next_service_id += 1
+        self.save_data()
+        return True, "Service added successfully"
+    
+    # NEW: Add service with user-supplied ID (with duplicate check)
+    def add_service_with_id(self, service_id, name, fee, description=""):
+        """User: custom ID with duplicate check and fee validation."""
+        if fee <= 0:
+            return False, "ERROR: PRICE MUST BE GREATER THAN ZERO"
+        if self.find_service_by_id(service_id):
+            return False, "ERROR: SERVICE ID ALREADY EXISTS"
+        service = Service(service_id, name, fee, description)
+        self.services.append(service)
+        if service_id >= self.next_service_id:
+            self.next_service_id = service_id + 1
         self.save_data()
         return True, "Service added successfully"
     
@@ -194,6 +209,7 @@ class DataManager:
         return False, "Service not found"
     
     def delete_service(self, service_id):
+        """Reused by admin, staff, and user delete routes."""
         service = self.find_service_by_id(service_id)
         if service:
             self.services.remove(service)
@@ -503,7 +519,7 @@ def admin_service_history():
 @app.route('/staff/dashboard')
 @staff_required
 def staff_dashboard():
-    return render_template('staff_dashboard.html', username=session['username'])
+    return render_template('staff_admindashboard.html', username=session['username'])
 
 @app.route('/staff/appointments')
 @staff_required
@@ -558,13 +574,15 @@ def staff_service_history():
 @app.route('/user/dashboard')
 @user_required
 def user_dashboard():
-    return render_template('user_dashboard.html', username=session['username'])
+    # Pass services to template for service management section
+    services = data_manager.get_all_services()
+    return render_template('user_dashboard.html', username=session['username'], services=services)
 
 @app.route('/user/appointments')
 @user_required
 def user_appointments():
     appointments = data_manager.get_all_appointments()
-    return render_template('user_appointments.html', appointments=appointments)
+    return render_template('user_dashboard.html', appointments=appointments)
 
 @app.route('/user/book_appointment', methods=['GET', 'POST'])
 @user_required
@@ -577,7 +595,7 @@ def book_appointment():
         success, message = data_manager.create_appointment(customer_name, service_ids, date_time, special_requests)
         flash(message)
         if success:
-            return redirect(url_for('user_appointments'))
+            return redirect(url_for('user_dashboard'))
     services = data_manager.get_all_services()
     return render_template('book_appointment.html', services=services)
 
@@ -603,6 +621,56 @@ def service_history():
     appointments = data_manager.get_all_appointments()
     completed_appointments = [a for a in appointments if a.get_status() == 'Completed']
     return render_template('service_history.html', appointments=completed_appointments)
+
+# ---------- NEW USER SERVICE MANAGEMENT ROUTES ----------
+@app.route('/user/service/add', methods=['POST'])
+@user_required
+def user_add_service():
+    """Allow logged-in users to add a new service with custom ID."""
+    try:
+        service_id = int(request.form.get('service_id', ''))
+        name = request.form.get('name', '').strip()
+        fee = float(request.form.get('fee', 0))
+        description = request.form.get('description', '').strip()
+    except ValueError:
+        flash("Invalid input. Please enter numbers correctly.")
+        return redirect(url_for('user_dashboard'))
+
+    if not name:
+        flash("Service name cannot be empty.")
+        return redirect(url_for('user_dashboard'))
+
+    success, message = data_manager.add_service_with_id(service_id, name, fee, description)
+    flash(message)
+    return redirect(url_for('user_dashboard'))
+
+@app.route('/user/service/delete/<int:service_id>')
+@user_required
+def user_delete_service(service_id):
+    """Delete a service using its ID from a direct link (row delete)."""
+    success, message = data_manager.delete_service(service_id)
+    flash(message)
+    return redirect(url_for('user_dashboard'))
+
+@app.route('/user/service/delete_select', methods=['POST'])
+@user_required
+def user_delete_service_select():
+    """Delete a service selected from a dropdown menu."""
+    try:
+        service_id = int(request.form.get('service_id'))
+    except (TypeError, ValueError):
+        flash("Invalid service ID.")
+        return redirect(url_for('user_dashboard'))
+
+    # Check existence before deletion
+    service = data_manager.find_service_by_id(service_id)
+    if not service:
+        flash("ERROR: Service ID does NOT exist.")
+        return redirect(url_for('user_dashboard'))
+
+    success, message = data_manager.delete_service(service_id)
+    flash(message)
+    return redirect(url_for('user_dashboard'))
 
 if __name__ == '__main__':
     app.run(debug=True)
