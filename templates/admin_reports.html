@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Reports</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f4f4; }
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; padding: 15px 30px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .nav-links a { color: white; text-decoration: none; margin-left: 20px; }
+        .container { padding: 30px; max-width: 1200px; margin: 0 auto; }
+        .card { background: white; border-radius: 10px; padding: 30px; margin-bottom: 30px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { margin-bottom: 20px; }
+        .btn { display: inline-block; background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 10px; }
+        .btn:hover { background: #5a67d8; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h2>Report Center</h2>
+        <div class="nav-links">
+            <a href="/admin/dashboard">Dashboard</a>
+            <a href="/admin/services">Services</a>
+            <a href="/admin/appointments">Appointments</a>
+            <a href="/admin/reports">Reports</a>
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+    <div class="container">
+        <div class="card">
+            <h2>📊 Generate Reports</h2>
+            <a href="/admin/daily_report" class="btn">Daily Report</a>
+            <a href="/admin/monthly_report" class="btn">Monthly Report</a>
+        </div>
+    </div>
+</body>
+</html>
