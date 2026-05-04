@@ -51,7 +51,7 @@
             margin-bottom: 5px;
             color: #666;
         }
-        .form-group input, .form-group textarea {
+        .form-group input, .form-group textarea, .form-group select {
             width: 100%;
             padding: 10px;
             border: 1px solid #ddd;
@@ -97,11 +97,14 @@
             border-radius: 5px;
             margin-bottom: 20px;
         }
+        hr {
+            margin: 20px 0;
+        }
     </style>
 </head>
 <body>
     <div class="navbar">
-        <h2>Service Management</h2>
+        <h2>Admin Dashboard – Service Management</h2>
         <div class="nav-links">
             <a href="/admin/dashboard">Dashboard</a>
             <a href="/admin/services">Services</a>
@@ -120,27 +123,33 @@
             {% endif %}
         {% endwith %}
         
+        <!-- ADD SERVICE (with custom ID) -->
         <div class="form-card">
-            <h2>Add New Service</h2>
+            <h2>➕ Add New Service (with custom ID)</h2>
             <form method="POST" action="/admin/service/add">
                 <div class="form-group">
-                    <label for="service-name">Service Name</label>
-                    <input type="text" id="service-name" name="name" placeholder="Enter service name" required>
+                    <label>Service ID (number, must be unique)</label>
+                    <input type="number" name="service_id" placeholder="e.g., 101" required>
+                </div>
+                <div class="form-group">
+                    <label>Service Name</label>
+                    <input type="text" name="name" placeholder="Enter service name" required>
                 </div>
                 <div class="form-group">
                     <label>Service Fee (₱)</label>
-                    <input type="number" step="0.01" name="fee" required title="Service Fee" placeholder="Enter service fee">
+                    <input type="number" step="0.01" name="fee" placeholder="Enter service fee" required>
                 </div>
                 <div class="form-group">
                     <label>Description</label>
-                    <textarea name="description" rows="3" title="Service Description" placeholder="Enter service description"></textarea>
+                    <textarea name="description" rows="3" placeholder="Enter service description"></textarea>
                 </div>
                 <button type="submit">Add Service</button>
             </form>
         </div>
-        
+
+        <!-- SERVICE LIST (Inline Update + Delete per row) -->
         <div class="table-card">
-            <h2>Service List</h2>
+            <h2>📋 All Services (Update inline or Delete)</h2>
             <table>
                 <thead>
                     <tr>
@@ -156,8 +165,8 @@
                     <tr>
                         <form method="POST" action="/admin/service/update/{{ service.get_service_id() }}">
                             <td>{{ service.get_service_id() }}</td>
-                            <td><input type="text" name="name" value="{{ service.get_name() }}" required title="Service Name" placeholder="Service name"></td>
-                            <td><input type="number" step="0.01" name="fee" value="{{ service.get_fee() }}" required title="Service Fee" placeholder="Service fee"></td>
+                            <td><input type="text" name="name" value="{{ service.get_name() }}" title="Service Name" placeholder="Service name" required></td>
+                            <td><input type="number" step="0.01" name="fee" value="{{ service.get_fee() }}" title="Service Fee" placeholder="Service fee" required></td>
                             <td><input type="text" name="description" value="{{ service.get_description() }}" title="Service Description" placeholder="Service description"></td>
                             <td>
                                 <button type="submit" class="edit-form">Update</button>
