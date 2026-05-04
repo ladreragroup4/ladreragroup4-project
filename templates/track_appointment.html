@@ -144,6 +144,15 @@
             display: inline-block;
             min-width: 120px;
         }
+        .status-text-pending {
+            color: #ff9800;
+        }
+        .status-text-ongoing {
+            color: #2196f3;
+        }
+        .status-text-completed {
+            color: #4caf50;
+        }
         .alert {
             background: #4CAF50;
             color: white;
@@ -268,14 +277,7 @@
                 </div>
                 <div class="detail-item">
                     <strong>📊 Current Status:</strong> 
-                    <span style="
-                        {% if appointment.get_status() == 'Pending' %}
-                            color: #ff9800; font-weight: bold;
-                        {% elif appointment.get_status() == 'Ongoing' %}
-                            color: #2196f3; font-weight: bold;
-                        {% else %}
-                            color: #4caf50; font-weight: bold;
-                        {% endif %}">
+                    <span class="{% if appointment.get_status() == 'Pending' %}status-text-pending{% elif appointment.get_status() == 'Ongoing' %}status-text-ongoing{% else %}status-text-completed{% endif %}" style="font-weight: bold;">
                         {{ appointment.get_status() }}
                         {% if appointment.get_status() == 'Pending' %}⏳
                         {% elif appointment.get_status() == 'Ongoing' %}🔄
