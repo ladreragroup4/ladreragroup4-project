@@ -2,145 +2,87 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Daily Report - Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Service Report</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f4f4f4;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f4f4; }
         .navbar {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            color: white; padding: 15px 30px;
+            display: flex; justify-content: space-between; align-items: center;
         }
-        .navbar h2 { font-size: 20px; }
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-        }
-        .container {
-            padding: 30px;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        .card {
-            background: white;
-            border-radius: 10px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        h2 {
-            color: #333;
-            margin-bottom: 20px;
-            border-left: 4px solid #667eea;
-            padding-left: 15px;
-        }
-        .info-box {
-            background: #f0f0f0;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-        }
-        .btn {
-            display: inline-block;
-            background: #667eea;
-            color: white;
-            padding: 8px 16px;
-            border-radius: 5px;
-            text-decoration: none;
-            margin-right: 10px;
-            border: none;
-            cursor: pointer;
-        }
-        .btn-secondary {
-            background: #764ba2;
-        }
-        form {
-            margin: 20px 0;
-        }
-        input, select {
-            padding: 8px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
-        }
-        th {
-            background: #667eea;
-            color: white;
-        }
+        .nav-links a { color: white; text-decoration: none; margin-left: 20px; }
+        .container { padding: 30px; max-width: 1200px; margin: 0 auto; }
+        .card { background: white; border-radius: 10px; padding: 25px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h2 { margin-bottom: 20px; color: #333; border-left: 4px solid #667eea; padding-left: 15px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, button { padding: 10px; border: 1px solid #ddd; border-radius: 5px; }
+        button { background: #667eea; color: white; border: none; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #f8f9fa; }
+        .alert { background: #4CAF50; color: white; padding: 10px; border-radius: 5px; margin-bottom: 20px; }
+        .export-btn { background: #28a745; margin-top: 10px; display: inline-block; }
+        .status-pending { color: #f39c12; }
+        .status-ongoing { color: #3498db; }
+        .status-completed { color: #2ecc71; }
     </style>
 </head>
 <body>
     <div class="navbar">
-        <h2>Service Appointment System - Daily Report</h2>
+        <h2>Daily Service Report</h2>
         <div class="nav-links">
             <a href="/admin/dashboard">Dashboard</a>
             <a href="/admin/services">Services</a>
             <a href="/admin/appointments">Appointments</a>
+            <a href="/admin/reports">Reports</a>
             <a href="/logout">Logout</a>
         </div>
     </div>
     <div class="container">
         <div class="card">
-            <h2>📅 Daily Service Report</h2>
-            <form method="POST" action="/admin/daily_report">
-                <label for="date">Select Date (YYYY-MM-DD):</label>
-                <input type="date" name="date" id="date" value="{{ request.form.get('date', '') }}" required>
-                <button type="submit" class="btn">Display Report</button>
+            <h2>📅 Select Date</h2>
+            <form method="POST">
+                <div class="form-group">
+                    <label for="date">Date (YYYY-MM-DD)</label>
+                    <input type="date" id="date" name="date" required>
+                </div>
+                <button type="submit">Generate Daily Report</button>
             </form>
         </div>
 
         {% if report %}
         <div class="card">
             <h2>Report for {{ report.date }}</h2>
-            <div class="info-box">
-                <p><strong>Total Appointments:</strong> {{ report.total_appointments }}</p>
-                <p><strong>Total Fees Collected:</strong> ₱{{ "%.2f"|format(report.total_fees) }}</p>
-                <p><strong>Most Requested Service:</strong> {{ report.most_requested_service }}</p>
-            </div>
+            <p><strong>Total Appointments:</strong> {{ report.total_appointments }}</p>
+            <p><strong>Total Fees Collected:</strong> ₱{{ "%.2f"|format(report.total_fees) }}</p>
+            <p><strong>Most Requested Service:</strong> {{ report.most_requested_service }}</p>
             
+            {% if report.appointments %}
             <h3>Appointment Details</h3>
             <table>
-                <tr>
-                    <th>ID</th><th>Customer</th><th>Services</th><th>Time</th><th>Status</th><th>Total</th>
-                </tr>
-                {% for apt in report.appointments %}
-                <tr>
-                    <td>{{ apt.get_appointment_id() }}</td>
-                    <td>{{ apt.get_customer_name() }}</td>
-                    <td>{{ apt.get_service_list()|map(attribute='get_name')|join(', ') }}</td>
-                    <td>{{ apt.get_date_time() }}</td>
-                    <td>{{ apt.get_status() }}</td>
-                    <td>₱{{ "%.2f"|format(apt.get_total_fee()) }}</td>
-                </tr>
-                {% endfor %}
+                <thead>
+                    <tr><th>ID</th><th>Customer</th><th>Services</th><th>Date/Time</th><th>Status</th><th>Total Fee</th></tr>
+                </thead>
+                <tbody>
+                    {% for apt in report.appointments %}
+                    <tr>
+                        <td>{{ apt.get_appointment_id() }}</td>
+                        <td>{{ apt.get_customer_name() }}</td>
+                        <td>{{ apt.get_service_list()|map(attribute='get_name')|join(', ') }}</td>
+                        <td>{{ apt.get_date_time() }}</td>
+                        <td class="status-{{ apt.get_status().lower() }}">{{ apt.get_status() }}</td>
+                        <td>₱{{ "%.2f"|format(apt.get_total_fee()) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
             </table>
-
-            <div style="margin-top: 20px;">
-                <a href="/admin/export_daily_report?date={{ report.date }}" class="btn">📎 Export Report (CSV)</a>
-                <a href="/admin/service_history" class="btn btn-secondary">📜 View Service History</a>
-                <a href="/admin/daily_report" class="btn">🔄 New Report</a>
-            </div>
+            <a href="{{ url_for('export_daily_report', date=report.date) }}" class="export-btn" style="display:inline-block; background:#28a745; padding:8px 15px; border-radius:5px; color:white; text-decoration:none; margin-top:15px;">📎 Export to CSV</a>
+            {% else %}
+            <p>No appointments on this date.</p>
+            {% endif %}
         </div>
         {% endif %}
     </div>
