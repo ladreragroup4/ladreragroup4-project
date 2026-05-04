@@ -324,8 +324,6 @@ data_manager = DataManager()
 users = {
     'admin': ['admin123', 'admin'],
     'user1': ['user123', 'user'],
-    'gwapo': ['admin123', 'admin'],
-    'pangit': ['user123', 'user'],
     'staff1': ['staff123', 'staff']
 }
 
