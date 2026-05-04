@@ -67,11 +67,8 @@
     <div class="navbar">
         <h2>Service History</h2>
         <div class="nav-links">
-            <a href="/user/dashboard">Dashboard</a>
-            <a href="/user/appointments">My Appointments</a>
-            <a href="/user/book_appointment">Book Appointment</a>
-            <a href="/user/track_appointment">Track Appointment</a>
-            <a href="/user/service_history">Service History</a>
+            <!-- Dynamic dashboard link based on URL path -->
+            <a href="#" id="dashboardLink">Dashboard</a>
             <a href="/logout">Logout</a>
         </div>
     </div>
@@ -117,5 +114,19 @@
             {% endif %}
         </div>
     </div>
+
+    <script>
+        // Role detection from URL – no backend changes needed
+        const path = window.location.pathname;
+        let dashboardUrl = '/login';
+        if (path.startsWith('/admin')) {
+            dashboardUrl = '/admin/dashboard';
+        } else if (path.startsWith('/staff')) {
+            dashboardUrl = '/staff/dashboard';
+        } else if (path.startsWith('/user')) {
+            dashboardUrl = '/user/dashboard';
+        }
+        document.getElementById('dashboardLink').href = dashboardUrl;
+    </script>
 </body>
 </html>
