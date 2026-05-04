@@ -78,7 +78,7 @@
         }
         .stat-card h3 {
             color: #667eea;
-            font-size: 36px;
+            font-size: 28px;
             margin-bottom: 10px;
         }
         .stat-card p {
@@ -112,27 +112,18 @@
             transition: all 0.3s;
             border: 1px solid #e0e0e0;
         }
-        .report-card:hover {
-            background: #667eea;
-            color: white;
-            transform: translateY(-3px);
-        }
         .report-card a {
             text-decoration: none;
             color: inherit;
             display: block;
         }
-        .report-card h3 {
-            margin-bottom: 10px;
-        }
-        .btn {
-            display: inline-block;
+        .report-card:hover {
             background: #667eea;
             color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            text-decoration: none;
-            margin-top: 10px;
+            transform: translateY(-3px);
+        }
+        .report-card h3 {
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -154,37 +145,38 @@
             <p>Manage services, appointments, and view reports from this dashboard.</p>
         </div>
 
-        <!-- NEW: Select Report Section -->
+        <!-- Quick access cards (now clickable) -->
+        <div class="stats-grid">
+            <a href="/admin/services" class="stat-card">
+                <h3>🛠️ Manage Services</h3>
+                <p>Add, update, or delete services</p>
+            </a>
+            <a href="/admin/appointments" class="stat-card">
+                <h3>📅 View Appointments</h3>
+                <p>Monitor and update appointment status</p>
+            </a>
+            <a href="/admin/reports" class="stat-card">
+                <h3>📊 Generate Reports</h3>
+                <p>View daily and monthly reports</p>
+            </a>
+        </div>
+
+        <!-- Report selection section (optional) -->
         <div class="report-section">
-            <h2>📊 Select Report</h2>
+            <h2>📊 Generate Report</h2>
             <div class="report-choices">
                 <div class="report-card">
                     <a href="/admin/daily_report">
                         <h3>📅 Daily Service Report</h3>
-                        <p>View total appointments, most requested service, export data, and service history for a specific day.</p>
+                        <p>View total appointments, most requested service, export data.</p>
                     </a>
                 </div>
                 <div class="report-card">
                     <a href="/admin/monthly_report">
                         <h3>📆 Monthly Service Report</h3>
-                        <p>View monthly totals, most requested service, export data, and service history for a month.</p>
+                        <p>View monthly totals, service summary, export data.</p>
                     </a>
                 </div>
-            </div>
-        </div>
-        
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>Manage Services</h3>
-                <p>Add, update, or delete services</p>
-            </div>
-            <div class="stat-card">
-                <h3>View Appointments</h3>
-                <p>Monitor and update appointment status</p>
-            </div>
-            <div class="stat-card">
-                <h3>Generate Reports</h3>
-                <p>View daily and monthly reports</p>
             </div>
         </div>
     </div>
