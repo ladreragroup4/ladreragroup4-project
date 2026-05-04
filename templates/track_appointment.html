@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Track Appointment</title>
+    <title>Track Appointment - Staff</title>
     <style>
         * {
             margin: 0;
@@ -15,28 +15,22 @@
             background: #f4f4f4;
         }
         .navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #2c3e50, #3498db);
             color: white;
             padding: 15px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
         }
         .navbar h2 {
             font-size: 20px;
-        }
-        .nav-links {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
         }
         .nav-links a {
             color: white;
             text-decoration: none;
             padding: 5px 10px;
             border-radius: 5px;
-            transition: background 0.3s;
+            margin-left: 10px;
         }
         .nav-links a:hover {
             background: rgba(255,255,255,0.2);
@@ -46,255 +40,145 @@
             max-width: 800px;
             margin: 0 auto;
         }
-        .track-card {
+        .card {
             background: white;
             border-radius: 10px;
-            padding: 30px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 25px;
+            margin-bottom: 30px;
         }
-        .track-card h2 {
-            color: #333;
+        .card h2 {
+            color: #2c3e50;
             margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
         }
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
-        .form-group label {
+        label {
             display: block;
             margin-bottom: 5px;
-            color: #666;
-            font-weight: 500;
+            font-weight: bold;
+            color: #555;
         }
-        .form-group input {
+        input[type="number"] {
             width: 100%;
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 5px;
-            font-size: 14px;
-        }
-        .form-group input:focus {
-            outline: none;
-            border-color: #667eea;
+            font-size: 16px;
         }
         button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #3498db;
             color: white;
-            padding: 12px 24px;
             border: none;
+            padding: 10px 20px;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 14px;
-            transition: transform 0.2s;
+            font-size: 16px;
         }
         button:hover {
-            transform: translateY(-2px);
+            background: #2980b9;
         }
         .appointment-details {
-            margin-top: 30px;
+            background: #f9f9f9;
             padding: 20px;
-            background: #f8f9fa;
-            border-radius: 5px;
+            border-radius: 8px;
+            margin-top: 20px;
         }
-        .appointment-details h3 {
-            color: #333;
-            margin-bottom: 15px;
-        }
-        .status-timeline {
-            margin: 20px 0;
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-        }
-        .status-step {
-            text-align: center;
-            flex: 1;
-            min-width: 80px;
-        }
-        .status-circle {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #ddd;
-            margin: 0 auto 10px;
-            line-height: 40px;
-            font-weight: bold;
-            color: #666;
-        }
-        .status-circle.active {
-            background: #4caf50;
-            color: white;
-        }
-        .status-circle.completed {
-            background: #4caf50;
-            color: white;
-        }
-        .status-step div:last-child {
-            font-size: 12px;
-            color: #666;
-        }
-        .detail-item {
+        .appointment-details p {
             margin: 10px 0;
-            padding: 10px;
-            background: white;
-            border-radius: 5px;
-            border-left: 3px solid #667eea;
+            line-height: 1.5;
         }
-        .detail-item strong {
-            color: #333;
+        .status {
             display: inline-block;
-            min-width: 120px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
         }
-        .status-text-pending {
-            color: #ff9800;
-        }
-        .status-text-ongoing {
-            color: #2196f3;
-        }
-        .status-text-completed {
-            color: #4caf50;
-        }
-        .alert {
-            background: #4CAF50;
-            color: white;
-            padding: 12px;
-            border-radius: 5px;
+        .status-pending { background: #f39c12; color: white; }
+        .status-ongoing { background: #3498db; color: white; }
+        .status-completed { background: #2ecc71; color: white; }
+        .flash-messages {
             margin-bottom: 20px;
-            text-align: center;
         }
-        .error {
-            background: #f44336;
+        .flash-messages p {
+            background: #fed7d7;
+            color: #9b2c2c;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 5px;
         }
-        .info {
-            background: #2196f3;
+        .service-list {
+            margin: 10px 0 0 20px;
+            list-style: disc;
         }
-        @media (max-width: 768px) {
-            .navbar {
-                flex-direction: column;
-                text-align: center;
-                gap: 10px;
-            }
-            .nav-links {
-                justify-content: center;
-            }
-            .container {
-                padding: 15px;
-            }
-            .track-card {
-                padding: 20px;
-            }
-            .detail-item strong {
-                display: block;
-                margin-bottom: 5px;
-            }
+        hr {
+            margin: 20px 0;
+            border: none;
+            border-top: 1px solid #ddd;
         }
     </style>
 </head>
 <body>
     <div class="navbar">
-        <h2>📅 Track Your Appointment</h2>
+        <h2>Service Appointment System - Staff Panel</h2>
         <div class="nav-links">
-            <a href="/user/dashboard">🏠 Dashboard</a>
-            <a href="/user/appointments">📋 My Appointments</a>
-            <a href="/user/book_appointment">📝 Book Appointment</a>
-            <a href="/user/track_appointment">📍 Track Appointment</a>
-            <a href="/user/service_history">📜 Service History</a>
-            <a href="/logout">🚪 Logout</a>
+            <a href="/staff/dashboard">Dashboard</a>
+            <a href="/staff/appointments">View Appointments</a>
+            <a href="/staff/service_history">History</a>
+            <a href="/logout">Logout</a>
         </div>
     </div>
-    
+
     <div class="container">
-        {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert 
-                        {% if 'not found' in message.lower() or 'invalid' in message.lower() %}error
-                        {% elif 'success' in message.lower() %}info
-                        {% endif %}">
-                        {{ message }}
-                    </div>
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages() %}
+                {% for msg in messages %}
+                    <p>{{ msg }}</p>
                 {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
-        <div class="track-card">
-            <h2>🔍 Track Service Status</h2>
-            <form method="POST" action="/user/track_appointment">
+            {% endwith %}
+        </div>
+
+        <div class="card">
+            <h2>📍 Track an Appointment</h2>
+            <form method="POST">
                 <div class="form-group">
-                    <label>📌 Enter Appointment ID:</label>
-                    <input type="number" name="appointment_id" placeholder="Example: 1, 2, 3..." required>
+                    <label for="appointment_id">Appointment ID:</label>
+                    <input type="number" name="appointment_id" id="appointment_id" placeholder="Enter appointment ID" required>
                 </div>
-                <button type="submit">🔎 Track Now</button>
+                <button type="submit">Track Now</button>
             </form>
-            
+
             {% if appointment %}
-            <div class="appointment-details">
-                <h3>✅ Appointment #{{ appointment.get_appointment_id() }}</h3>
-                
-                <div class="status-timeline">
-                    <div class="status-step">
-                        <div class="status-circle 
-                            {% if appointment.get_status() == 'Pending' %}active
-                            {% elif appointment.get_status() == 'Ongoing' %}completed
-                            {% elif appointment.get_status() == 'Completed' %}completed
+                <div class="appointment-details">
+                    <h3>Appointment Details</h3>
+                    <p><strong>ID:</strong> {{ appointment.get_appointment_id() }}</p>
+                    <p><strong>Customer:</strong> {{ appointment.get_customer_name() }}</p>
+                    <p><strong>Date & Time:</strong> {{ appointment.get_date_time() }}</p>
+                    <p><strong>Status:</strong> 
+                        <span class="status 
+                            {% if appointment.get_status() == 'Pending' %}status-pending
+                            {% elif appointment.get_status() == 'Ongoing' %}status-ongoing
+                            {% elif appointment.get_status() == 'Completed' %}status-completed
                             {% endif %}">
-                            1
-                        </div>
-                        <div>⏳ Pending</div>
-                    </div>
-                    <div class="status-step">
-                        <div class="status-circle 
-                            {% if appointment.get_status() == 'Ongoing' %}active
-                            {% elif appointment.get_status() == 'Completed' %}completed
-                            {% endif %}">
-                            2
-                        </div>
-                        <div>🔄 Ongoing</div>
-                    </div>
-                    <div class="status-step">
-                        <div class="status-circle 
-                            {% if appointment.get_status() == 'Completed' %}active
-                            {% endif %}">
-                            3
-                        </div>
-                        <div>✅ Completed</div>
-                    </div>
+                            {{ appointment.get_status() }}
+                        </span>
+                    </p>
+                    <p><strong>Services:</strong></p>
+                    <ul class="service-list">
+                        {% for service in appointment.get_service_list() %}
+                            <li>{{ service.get_name() }} - ₱{{ "%.2f"|format(service.get_fee()) }}</li>
+                        {% endfor %}
+                    </ul>
+                    <p><strong>Total Fee:</strong> ₱{{ "%.2f"|format(appointment.get_total_fee()) }}</p>
+                    {% if appointment.get_special_requests() %}
+                        <p><strong>Special Requests:</strong> {{ appointment.get_special_requests() }}</p>
+                    {% endif %}
+                    <hr>
+                    <p><em>You can update the status from the <a href="/staff/appointments">Appointments List</a>.</em></p>
                 </div>
-                
-                <div class="detail-item">
-                    <strong>👤 Customer:</strong> {{ appointment.get_customer_name() }}
-                </div>
-                <div class="detail-item">
-                    <strong>💇 Services:</strong><br>
-                    {% for service in appointment.get_service_list() %}
-                        • {{ service.get_name() }} - ₱{{ "%.2f"|format(service.get_fee()) }}<br>
-                    {% endfor %}
-                </div>
-                <div class="detail-item">
-                    <strong>📅 Date & Time:</strong> {{ appointment.get_date_time() }}
-                </div>
-                <div class="detail-item">
-                    <strong>💰 Total Fee:</strong> ₱{{ "%.2f"|format(appointment.get_total_fee()) }}
-                </div>
-                <div class="detail-item">
-                    <strong>📊 Current Status:</strong> 
-                    <span class="{% if appointment.get_status() == 'Pending' %}status-text-pending{% elif appointment.get_status() == 'Ongoing' %}status-text-ongoing{% else %}status-text-completed{% endif %}" style="font-weight: bold;">
-                        {{ appointment.get_status() }}
-                        {% if appointment.get_status() == 'Pending' %}⏳
-                        {% elif appointment.get_status() == 'Ongoing' %}🔄
-                        {% else %}✅{% endif %}
-                    </span>
-                </div>
-                {% if appointment.get_special_requests() %}
-                <div class="detail-item">
-                    <strong>💬 Special Requests:</strong> {{ appointment.get_special_requests() }}
-                </div>
-                {% endif %}
-            </div>
-            {% else %}
-            <div style="margin-top: 20px; padding: 20px; background: #fff3cd; border-radius: 5px; text-align: center; color: #856404;">
-                <p>💡 <strong>Tip:</strong> Enter an appointment ID to track its status!</p>
-                <p style="margin-top: 10px; font-size: 14px;">Example IDs: 1, 2, 3...</p>
-            </div>
             {% endif %}
         </div>
     </div>
