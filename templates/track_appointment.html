@@ -123,11 +123,11 @@
 </head>
 <body>
     <div class="navbar">
-        <h2>Service Appointment System - Staff Panel</h2>
+        <h2>user traacking services</h2>
         <div class="nav-links">
-            <a href="/staff/dashboard">Dashboard</a>
-            <a href="/staff/appointments">View Appointments</a>
-            <a href="/staff/service_history">History</a>
+            <a href="/user/dashboard">Dashboard</a>
+            <a href="/user/appointments">View Appointments</a>
+            <a href="/user/service_history">History</a>
             <a href="/logout">Logout</a>
         </div>
     </div>
@@ -177,7 +177,7 @@
                         <p><strong>Special Requests:</strong> {{ appointment.get_special_requests() }}</p>
                     {% endif %}
                     <hr>
-                    <p><em>You can update the status from the <a href="/staff/appointments">Appointments List</a>.</em></p>
+                    <p><em>You can update the status from the <a href="/user/appointments">Appointments List</a>.</em></p>
                 </div>
             {% endif %}
         </div>
